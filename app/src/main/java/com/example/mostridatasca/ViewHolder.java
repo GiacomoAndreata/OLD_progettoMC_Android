@@ -1,6 +1,7 @@
 package com.example.mostridatasca;
 
 
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -19,10 +20,11 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         xpGiocatore = itemView.findViewById(R.id.xp);
     }
 
-    void setText(JSONObject datiObjet){
+    void setText(JSONObject datiObject){
         try {
-            nomeGiocatore.setText(datiObjet.getString("username"));
-            xpGiocatore.setText(datiObjet.getString("xp"));
+            nomeGiocatore.setText(datiObject.getString("username"));
+            xpGiocatore.setText(datiObject.getString("xp"));
+            Log.d("ViewHolder", "Nome: " + datiObject.getString("username") + " Ex: " + datiObject.getString("xp"));
         }catch (JSONException e){
             e.printStackTrace();
         }

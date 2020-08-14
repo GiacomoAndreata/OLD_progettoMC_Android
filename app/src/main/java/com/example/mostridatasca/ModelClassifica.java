@@ -1,5 +1,7 @@
 package com.example.mostridatasca;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,7 +11,9 @@ public class ModelClassifica {
     public static final ModelClassifica instance = new ModelClassifica();
     private JSONArray datiGiocatori;
 
-    //METODI
+    private ModelClassifica(){
+        datiGiocatori = new JSONArray();
+    }
 
     public static ModelClassifica getInstance(){
         return instance;
@@ -24,6 +28,7 @@ public class ModelClassifica {
     }
 
     void add(Object datiGiocatoriObject){
+        Log.d("ModelADD", "Add: " + datiGiocatoriObject.toString());
         datiGiocatori.put(datiGiocatoriObject);
     }
 

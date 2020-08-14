@@ -1,6 +1,7 @@
 package com.example.mostridatasca;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,22 +20,23 @@ public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.recyclerview_row, parent, false);
         return new ViewHolder(view);
     }
 
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        JSONObject giocatoriObjec =null;
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        JSONObject giocatoriObject =null;
         try {
-            giocatoriObjec = ModelClassifica.getInstance().get(position);
+            giocatoriObject = ModelClassifica.getInstance().get(position);
         }catch (JSONException e){
             e.printStackTrace();
         }
 
-        holder.setText(giocatoriObjec);
+        holder.setText(giocatoriObject);
+        Log.d("MyAdapter", "onBindViewHolder");
     }
 
     @Override

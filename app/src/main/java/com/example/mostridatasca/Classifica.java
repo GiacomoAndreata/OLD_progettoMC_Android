@@ -61,13 +61,13 @@ public class Classifica extends AppCompatActivity {
                         //SALVATAGGIO DEI DATI
                         JSONArray datiGiocatori = null;
                         ModelClassifica modelClassifica = ModelClassifica.getInstance();
-                        modelClassifica.clear();
+                        modelClassifica.clearClassifica();
 
                         try {
                             datiGiocatori = response.getJSONArray("ranking");
                             for (int i = 0; i < datiGiocatori.length(); i++){
                                 JSONObject o = datiGiocatori.getJSONObject(i);
-                                modelClassifica.add(o);
+                                modelClassifica.addClassifica(o);
                             }
                         } catch (JSONException e){
                             e.printStackTrace();

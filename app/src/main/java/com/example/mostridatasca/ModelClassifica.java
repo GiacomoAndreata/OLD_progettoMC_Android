@@ -9,10 +9,10 @@ import org.json.JSONObject;
 public class ModelClassifica {
 
     public static final ModelClassifica instance = new ModelClassifica();
-    private JSONArray datiGiocatori;
+    private JSONArray datiClssifica;
 
     private ModelClassifica(){
-        datiGiocatori = new JSONArray();
+        datiClssifica = new JSONArray();
     }
 
     public static ModelClassifica getInstance(){
@@ -20,19 +20,19 @@ public class ModelClassifica {
     };
 
     JSONObject get(int index) throws JSONException {
-        return datiGiocatori.getJSONObject(index);
+        return datiClssifica.getJSONObject(index);
     }
 
     int getSize(){
-        return datiGiocatori.length();
+        return datiClssifica.length();
     }
 
-    void add(Object datiGiocatoriObject){
+    void addClassifica(Object datiGiocatoriObject){
         Log.d("ModelADD", "Add: " + datiGiocatoriObject.toString());
-        datiGiocatori.put(datiGiocatoriObject);
+        datiClssifica.put(datiGiocatoriObject);
     }
 
-    void clear(){
-        datiGiocatori = new JSONArray();
+    void clearClassifica(){
+        datiClssifica = new JSONArray();
     }
 }

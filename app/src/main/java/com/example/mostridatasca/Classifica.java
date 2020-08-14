@@ -47,7 +47,8 @@ public class Classifica extends AppCompatActivity {
         loadData();
     }
 
-    //TODO caricamento: dati giocatori
+    //TODO Inserire immagine giocatore, posizione in classifica
+
     public void loadData(){
         RequestQueue mRequestQueue = Volley.newRequestQueue(this);
         JsonObjectRequest request = new JsonObjectRequest(

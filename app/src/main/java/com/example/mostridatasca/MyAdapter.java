@@ -35,7 +35,7 @@ public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
             e.printStackTrace();
         }
 
-        holder.setText(giocatoriObject);
+        holder.setText(giocatoriObject, position);
         Log.d("MyAdapter", "onBindViewHolder");
     }
 

@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
                                     public void onResponse(JSONObject response) {
                                         Log.d("MyMain", "VolleyResponse getMap: " + response.toString());
 
-                                        JSONArray mapObjects = null;
+                                        JSONArray mapObjects;
 
                                         try {
                                             mapObjects = response.getJSONArray("mapobjects");
@@ -299,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }

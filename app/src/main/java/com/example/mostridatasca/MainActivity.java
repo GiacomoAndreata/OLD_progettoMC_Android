@@ -30,13 +30,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /* TEST PER CLASSIFICA:
-
-        setContentView(R.layout.activity_main);
-        Intent intent = new Intent(getApplicationContext(), Classifica.class);
-
-         */
-
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 
 

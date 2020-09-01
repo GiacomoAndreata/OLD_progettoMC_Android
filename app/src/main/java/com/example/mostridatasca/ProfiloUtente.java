@@ -2,26 +2,51 @@ package com.example.mostridatasca;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.ImageView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.mapbox.mapboxsdk.location.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProfiloUtente extends AppCompatActivity {
 
-    private final static String SESSION_ID = "8eOWKEcSInwRNBwC";
-    private final static String URL_GET_RANKING = "https://ewserver.di.unimi.it/mobicomp/mostri/setprofile.php";
-    private final static JSONObject AUTHENTICATION = new JSONObject();
-    private ImageView immagineProfilo;
+    private String SESSION_ID = "";
+    private final static String URL_SET_PROFILE = "https://ewserver.di.unimi.it/mobicomp/mostri/setprofile.php";
+    private static JSONObject AUTHENTICATION = new JSONObject();
+    private ImageButton immagineProfilo;
     private TextView username;
     private TextView vita;
     private TextView xp;
+    private Uri outputFileUri;
 
     private JSONObject datiProfiloGiocatore;
 
@@ -29,11 +54,22 @@ public class ProfiloUtente extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profilo_utente);
-
+        SESSION_ID = getString(R.string.test_session_id);
         datiProfiloGiocatore = Model.getInstance().getDatiGiocatore();
 
         //richiamo il metodo per inserire i dati del profilo
         setProfilo();
+
+        //classe anonima bottone modifica username
+        final TextView username = findViewById(R.id.username_profilo);
+        Button btn_modNome = findViewById(R.id.btn_modNome);
+        btn_modNome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                modificaUsername(username.getText().toString());
+                Log.d("BottoneModificaUsername", username.getText().toString());
+            }
+        });
 
     }
     //metodo per inserire i dati utente nel profilo
@@ -53,5 +89,107 @@ public class ProfiloUtente extends AppCompatActivity {
         } catch (JSONException e){
             e.printStackTrace();
         }
+    }
+
+    private void modificaUsername(String username){
+        AUTHENTICATION = new JSONObject();
+        try {
+            AUTHENTICATION.put("session_id", SESSION_ID);
+            AUTHENTICATION.put("username", username);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+        RequestQueue mRequestQueue = Volley.newRequestQueue(this);
+        JsonObjectRequest request = new JsonObjectRequest(
+                URL_SET_PROFILE,
+                AUTHENTICATION,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("modificaUsername", "Response: " + response.toString());
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("modificaUsername", "Error: " + error.toString());
+            }
+        }
+        );
+        mRequestQueue.add(request);
+    }
+
+    public void clickNew(View v)
+    {
+        //Toast.makeText(this, "Hai cliccato l'immagine.", Toast.LENGTH_LONG).show();
+        Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(pickPhoto , 1);
+
+        /*
+        Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(takePicture, 0);
+        */
+    }
+
+    //GALLERIA E FOTOCAMERA
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+        switch(requestCode) {
+            case 0:
+                if(resultCode == RESULT_OK){
+                    Log.d("fotocamera", "sei in 0");
+                }
+
+                break;
+            case 1:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    InputStream imageStream = null;
+                    try {
+                        imageStream = this.getContentResolver().openInputStream(selectedImage);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    Bitmap bm = BitmapFactory.decodeStream(imageStream);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bm.compress(Bitmap.CompressFormat.JPEG, 10, baos); // bm is the bitmap object
+                    byte[] byteArrayImage = baos.toByteArray();
+                    String encodedImage = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+                    Log.d("immagine", "base64: " + encodedImage);
+                    //metodo
+                    modificaImmagineProfilo(encodedImage);
+                }
+                break;
+        }
+    }
+
+    public void modificaImmagineProfilo(String img64){
+        AUTHENTICATION = new JSONObject();
+        try {
+            AUTHENTICATION.put("session_id", SESSION_ID);
+            AUTHENTICATION.put("img", img64);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+        RequestQueue mRequestQueue = Volley.newRequestQueue(this);
+        JsonObjectRequest request = new JsonObjectRequest(
+                URL_SET_PROFILE,
+                AUTHENTICATION,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("modificaImmgine", "Response: " + response.toString());
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("modificaImmgine", "Error: " + error.toString());
+            }
+        }
+        );
+        mRequestQueue.add(request);
     }
 }

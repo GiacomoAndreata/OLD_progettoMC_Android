@@ -2,40 +2,30 @@ package com.example.mostridatasca;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.mapbox.mapboxsdk.location.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ProfiloUtente extends AppCompatActivity {
 
@@ -57,6 +47,11 @@ public class ProfiloUtente extends AppCompatActivity {
         SESSION_ID = getString(R.string.test_session_id);
         datiProfiloGiocatore = Model.getInstance().getDatiGiocatore();
 
+        immagineProfilo = findViewById(R.id.imgUtente);
+        username = findViewById(R.id.username_profilo);
+        vita = findViewById(R.id.lp_profilo);
+        xp = findViewById(R.id.xp_profilo);
+
         //richiamo il metodo per inserire i dati del profilo
         setProfilo();
 
@@ -71,13 +66,19 @@ public class ProfiloUtente extends AppCompatActivity {
             }
         });
 
+        Button btnTorna = findViewById(R.id.btnTorna);
+        btnTorna.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+            }
+        });
     }
     //metodo per inserire i dati utente nel profilo
     private void setProfilo(){
-        immagineProfilo = findViewById(R.id.imgProfilo);
-        username = findViewById(R.id.username_profilo);
-        vita = findViewById(R.id.lp_profilo);
-        xp = findViewById(R.id.xp_profilo);
+
         try {
             byte[] decodedString = Base64.decode(datiProfiloGiocatore.getString("img"), Base64.DEFAULT);
             Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
@@ -165,7 +166,7 @@ public class ProfiloUtente extends AppCompatActivity {
         }
     }
 
-    public void modificaImmagineProfilo(String img64){
+    public void modificaImmagineProfilo(final String img64){
         AUTHENTICATION = new JSONObject();
         try {
             AUTHENTICATION.put("session_id", SESSION_ID);
@@ -182,6 +183,8 @@ public class ProfiloUtente extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         Log.d("modificaImmgine", "Response: " + response.toString());
 
+                        Model.getInstance().setImageUtente(img64);
+                        setProfilo();
                     }
                 }, new Response.ErrorListener() {
             @Override

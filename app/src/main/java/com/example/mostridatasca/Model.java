@@ -47,6 +47,14 @@ public class Model {
         datiGiocatore = g;
     }
 
+    void setImageUtente(String img64){
+        try {
+            datiGiocatore.put("img", img64);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     void clearMappa(){
         datiMappa = new JSONArray();
     }

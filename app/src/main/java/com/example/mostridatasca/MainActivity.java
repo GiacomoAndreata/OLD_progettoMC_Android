@@ -18,7 +18,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
 
     private TextView lifePoints;
     private TextView exp;
-    private ImageView imgUtente;
+    private ImageButton imgUtente;
 
     private SharedPreferences sharedPref;
 
@@ -102,6 +102,13 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
             }
         });
 
+        imgUtente.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent toProfilo = new Intent(getApplicationContext(), ProfiloUtente.class);
+                startActivity(toProfilo);
+            }
+        });
     }
 
     @Override

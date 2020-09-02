@@ -7,7 +7,7 @@
     tools:context=".ProfiloUtente">
 
     <ImageButton
-        android:id="@+id/imgProfilo"
+        android:id="@+id/imgUtente"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_marginStart="140dp"
@@ -26,7 +26,7 @@
         android:inputType="textPersonName"
         android:text="Name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgProfilo" />
+        app:layout_constraintTop_toBottomOf="@+id/imgUtente" />
 
     <TextView
         android:id="@+id/textView3"
@@ -78,6 +78,16 @@
         android:layout_marginTop="108dp"
         android:text="Modifica"
         app:layout_constraintStart_toEndOf="@+id/username_profilo"
-        app:layout_constraintTop_toBottomOf="@+id/imgProfilo" />
+        app:layout_constraintTop_toBottomOf="@+id/imgUtente" />
+
+    <Button
+        android:id="@+id/btnTorna"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="117dp"
+        android:text="torna"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lp_profilo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

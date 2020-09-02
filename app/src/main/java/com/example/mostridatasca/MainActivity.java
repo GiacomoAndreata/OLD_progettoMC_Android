@@ -9,10 +9,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -20,8 +27,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -48,6 +58,12 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
 
     private Model mModel = Model.getInstance();
 
+    private TextView lifePoints;
+    private TextView exp;
+    private ImageView imgUtente;
+
+    private SharedPreferences sharedPref;
+
     private MapView mapView;
     private MapboxMap mapboxMap;
 
@@ -61,7 +77,11 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
         setContentView(R.layout.activity_main);
 
-        startLoadingPage();
+        lifePoints = findViewById(R.id.lifePoints);
+        exp = findViewById(R.id.exp);
+        imgUtente = findViewById(R.id.imgUtente);
+
+        sharedPref = getSharedPreferences("preferenze", Context.MODE_PRIVATE);
 
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -70,6 +90,15 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
             public void onMapReady(@NonNull MapboxMap mapboxMap) {
                 MainActivity.this.mapboxMap = mapboxMap;
                 checkFirstSession();
+            }
+        });
+
+        Button btnClassifica = findViewById(R.id.btn_classifica);
+        btnClassifica.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), Classifica.class);
+                startActivity(intent);
             }
         });
 
@@ -87,8 +116,11 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
             public boolean onAnnotationClick(Symbol symbol) {
                 Log.d("MyMain", "click: " + Objects.requireNonNull(symbol.getData()).toString());
 
-                //TODO onClick: icona mostro --> activity combattimento con informazioni mostro (tramite intent)
-                //TODO onClick: icona caramella --> activity rifornimento con informazioni caramella (tramite intent)
+                JsonObject dataFromSymbol = symbol.getData().getAsJsonObject();
+
+                Intent toFightEat = new Intent(getApplicationContext(), FightEat.class);
+                toFightEat.putExtra("data", dataFromSymbol.toString());
+                startActivity(toFightEat);
 
                 return false;
             }
@@ -124,8 +156,15 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
         symbolManager.create(monsterSymbolOptions);
         symbolManager.create(candySymbolOptions);
 
-        //close loading page:
-        findViewById(R.id.fragment_container).setVisibility(View.GONE);
+        loadingPage(false);
+
+        CameraPosition position = new CameraPosition.Builder()
+                .target(new LatLng(45.4, 9.19))
+                .zoom(9)
+                .tilt(0)
+                .padding(0, 1000, 0,0 )
+                .build();
+        mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), 10);
     }
 
     private void register() {
@@ -138,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                            //SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString("session_id", response.getString("session_id"));
                             editor.apply();
@@ -162,7 +201,8 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
     }
 
     private void loadData(){
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        loadingPage(true);
+
         String session_id = sharedPref.getString("session_id", "");
 
         final JSONObject authentication = new JSONObject();
@@ -183,6 +223,23 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
                         Log.d("MyMain", "VolleyResponse getProfile: " + response.toString());
                         mModel.clear();
                         mModel.addDatiGiocatore(response);
+
+                        String imgBase64 = "";
+
+                        try {
+                            lifePoints.setText("LifePoints: " + response.getString("lp"));
+                            exp.setText("Experience: " + response.getString("xp"));
+
+                            imgBase64 = response.getString("img");
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        byte[] decodedString = Base64.decode(imgBase64, Base64.DEFAULT);
+                        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+                        imgUtente.setImageBitmap(decodedByte);
 
                         JsonObjectRequest getMapRequest = new JsonObjectRequest(
                                 URL_GET_MAP,
@@ -230,8 +287,6 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
     }
 
     void checkFirstSession(){
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-
         if (getString(R.string.test_session_id).equals("")){
             Log.d("MyMain", "test_session_id uguale a stringa vuota");
             if (!sharedPref.contains("session_id")){
@@ -254,13 +309,19 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
         }
     }
 
-    void startLoadingPage(){
-        findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
+    void loadingPage(boolean start){
+        if (start){
+            findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
 
-        FragmentCaricamento schermataCaricamento = new FragmentCaricamento();
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, schermataCaricamento);
-        transaction.commit();
+            FragmentCaricamento schermataCaricamento = new FragmentCaricamento();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, schermataCaricamento);
+            transaction.commit();
+        }
+        else{
+            findViewById(R.id.fragment_container).setVisibility(View.GONE);
+        }
+
     }
 
     //TODO metodo animazione barra di caricamento --> fine rimando a schermata mappa

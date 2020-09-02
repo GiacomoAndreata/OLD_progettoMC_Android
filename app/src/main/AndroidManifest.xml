@@ -13,8 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Rifornimento"></activity>
-        <activity android:name=".Combattimento" />
+        <activity android:name=".FightEat" />
         <activity android:name=".Classifica" />
         <activity android:name=".Profilo" />
         <activity android:name=".MainActivity">

@@ -18,7 +18,6 @@
         <activity android:name=".FightEat" />
         <activity android:name=".ProfiloUtente"></activity>
         <activity android:name=".Classifica" />
-        <activity android:name=".Profilo" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

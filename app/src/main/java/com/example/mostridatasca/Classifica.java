@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -25,14 +27,16 @@ public class Classifica extends AppCompatActivity {
 
     private final static String URL_GET_RANKING = "https://ewserver.di.unimi.it/mobicomp/mostri/ranking.php";
     private final static JSONObject AUTHENTICATION = new JSONObject();
-    //private final String SESSION_ID = getString(R.string.test_session_id);
-    private final static String SESSION_ID = "8eOWKEcSInwRNBwC";
+
     private MyAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_classifica);
+
+        SharedPreferences sharedPref = getSharedPreferences("preferenze", Context.MODE_PRIVATE);
+        String SESSION_ID = sharedPref.getString("session_id", "");
 
         try {
             AUTHENTICATION.put("session_id", SESSION_ID);

@@ -181,15 +181,15 @@ public class ProfiloUtente extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d("modificaImmgine", "Response: " + response.toString());
+                        Log.d("modificaImmagine", "Response: " + response.toString());
 
-                        Model.getInstance().setImageUtente(img64);
+                        Model.getInstance().setImageGiocatore(img64);
                         setProfilo();
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("modificaImmgine", "Error: " + error.toString());
+                Log.d("modificaImmagine", "Error: " + error.toString());
             }
         }
         );

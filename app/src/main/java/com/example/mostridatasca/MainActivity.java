@@ -52,10 +52,6 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements Style.OnStyleLoaded {
 
-    final static String URL_REGISTER = "https://ewserver.di.unimi.it/mobicomp/mostri/register.php";
-    final static String URL_GET_PROFILE = "https://ewserver.di.unimi.it/mobicomp/mostri/getprofile.php";
-    final static String URL_GET_MAP = "https://ewserver.di.unimi.it/mobicomp/mostri/getmap.php";
-
     private Model mModel = Model.getInstance();
 
     private TextView lifePoints;
@@ -67,9 +63,6 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
     private MapView mapView;
     private MapboxMap mapboxMap;
 
-    private static final String MONSTER_ICON_ID = "MONSTER_ICON_ID";
-    private static final String CANDY_ICON_ID = "CANDY_ICON_ID";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,8 +73,9 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
         lifePoints = findViewById(R.id.lifePoints);
         exp = findViewById(R.id.exp);
         imgUtente = findViewById(R.id.imgUtente);
-
         sharedPref = getSharedPreferences("preferenze", Context.MODE_PRIVATE);
+
+        loadingPage(true);
 
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -89,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
             @Override
             public void onMapReady(@NonNull MapboxMap mapboxMap) {
                 MainActivity.this.mapboxMap = mapboxMap;
+
+                //controllo della session_id, da qui può partire loadData() o register()
+                Log.d("MyMain", "checking session_id...");
                 checkFirstSession();
             }
         });
@@ -97,8 +94,8 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
         btnClassifica.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Classifica.class);
-                startActivity(intent);
+                Intent toClassifica = new Intent(getApplicationContext(), Classifica.class);
+                startActivity(toClassifica);
             }
         });
 
@@ -121,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
         symbolManager.addClickListener(new OnSymbolClickListener() {
             @Override
             public boolean onAnnotationClick(Symbol symbol) {
-                Log.d("MyMain", "click: " + Objects.requireNonNull(symbol.getData()).toString());
+                Log.d("MyMain", "click symbol: " + Objects.requireNonNull(symbol.getData()).toString());
 
                 JsonObject dataFromSymbol = symbol.getData().getAsJsonObject();
 
@@ -133,26 +130,30 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
             }
         });
 
-        style.addImage(MONSTER_ICON_ID, Objects.requireNonNull(getDrawable(R.drawable.monster_marker_view)));
-        style.addImage(CANDY_ICON_ID, Objects.requireNonNull(getDrawable(R.drawable.candy_marker_view)));
+        style.addImage(getString(R.string.monster_icon_id), Objects.requireNonNull(getDrawable(R.drawable.monster_marker_view)));
+        style.addImage(getString(R.string.candy_icon_id), Objects.requireNonNull(getDrawable(R.drawable.candy_marker_view)));
 
         List<SymbolOptions> monsterSymbolOptions = new ArrayList<>();
         List<SymbolOptions> candySymbolOptions = new ArrayList<>();
 
+        //aggiunta simboli sulla mappa
+        // N.B.:
+        // Nel model i dati sono salvati come org.json (perche Volley usa questa libreria),
+        // mentre le SymbolOptions hanno bisogno di com.google.gson. Necessario convertire i dati.
         try {
-            for (int i = 0; i < mModel.getSizeMappa(); i++) {
+            for (int i = 0; i < mModel.lengthDatiMappa(); i++) {
                 JSONObject mapObject = mModel.getElementoMappa(i);
                 if (mapObject.getString("type").equals("MO")) {
                     monsterSymbolOptions.add(new SymbolOptions()
                             .withLatLng(new LatLng(mapObject.getDouble("lat"), mapObject.getDouble("lon")))
                             .withIconImage("MONSTER_ICON_ID")
-                            .withData(new JsonParser().parse(mapObject.toString()).getAsJsonObject())); //da JSON a Json
+                            .withData(JsonParser.parseString(mapObject.toString()).getAsJsonObject())); //da org.json a com.google.gson
                 }
                 else{
                     candySymbolOptions.add(new SymbolOptions()
                             .withLatLng(new LatLng(mapObject.getDouble("lat"), mapObject.getDouble("lon")))
                             .withIconImage("CANDY_ICON_ID")
-                            .withData(new JsonParser().parse(mapObject.toString()).getAsJsonObject())); //da JSON a Json
+                            .withData(JsonParser.parseString(mapObject.toString()).getAsJsonObject())); //da org.json a com.google.gson
                 }
             }
         }
@@ -165,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
 
         loadingPage(false);
 
+        //TODO aggiungere location
         CameraPosition position = new CameraPosition.Builder()
                 .target(new LatLng(45.4, 9.19))
                 .zoom(9)
@@ -176,15 +178,14 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
 
     private void register() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+        JsonObjectRequest registerRequest = new JsonObjectRequest(
                 Request.Method.GET,
-                URL_REGISTER,
+                getString(R.string.url_get_profile),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            //SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString("session_id", response.getString("session_id"));
                             editor.apply();
@@ -200,16 +201,13 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        //TODO gestire errore di connessione
-                        Log.d("MyMain", "volley error");
+                        Log.d("MyMain", "volley error: " + error.toString());
                     }
                 });
-        queue.add(jsonObjectRequest);
+        queue.add(registerRequest);
     }
 
     private void loadData(){
-        loadingPage(true);
-
         String session_id = sharedPref.getString("session_id", "");
 
         final JSONObject authentication = new JSONObject();
@@ -222,14 +220,14 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
 
         final RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest getProfileRequest = new JsonObjectRequest(
-                URL_GET_PROFILE,
+                getString(R.string.url_get_profile),
                 authentication,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d("MyMain", "VolleyResponse getProfile: " + response.toString());
                         mModel.clear();
-                        mModel.addDatiGiocatore(response);
+                        mModel.setDatiGiocatore(response);
 
                         String imgBase64 = "";
 
@@ -243,13 +241,14 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
                             e.printStackTrace();
                         }
 
+                        //decodifica img da base64 a bitmap
                         byte[] decodedString = Base64.decode(imgBase64, Base64.DEFAULT);
                         Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
                         imgUtente.setImageBitmap(decodedByte);
 
                         JsonObjectRequest getMapRequest = new JsonObjectRequest(
-                                URL_GET_MAP,
+                                getString(R.string.url_get_map),
                                 authentication,
                                 new Response.Listener<JSONObject>() {
 
@@ -261,11 +260,9 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
 
                                         try {
                                             mapObjects = response.getJSONArray("mapobjects");
-                                            mModel.addDatiMappa(mapObjects);
+                                            mModel.setDatiMappa(mapObjects);
 
                                             Log.d("MyMain", "Model loaded.");
-                                            Log.d("MyMain", "dati giocatore: " + mModel.getDatiGiocatore().toString());
-                                            Log.d("MyMain", "dati mappa: " + mModel.getDatiMappa().toString());
 
                                             //una volta scaricati gli oggetti dal server, li carico sulla mappa:
                                             mapboxMap.setStyle(Style.MAPBOX_STREETS, MainActivity.this);
@@ -295,28 +292,30 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
 
     void checkFirstSession(){
         if (getString(R.string.test_session_id).equals("")){
-            Log.d("MyMain", "test_session_id uguale a stringa vuota");
+            Log.d("MyMain", "test_session_id vuota, controllo shared preferences");
             if (!sharedPref.contains("session_id")){
-                Log.d("MyMain", "registering...");
+                Log.d("MyMain", "sharedPref vuota, registering...");
                 register();
             }
             else{
-                Log.d("MyMain", "session id salvata: " + sharedPref.getString("session_id", "NOT FOUND"));
-
+                Log.d("MyMain", "session id presente: " + sharedPref.getString("session_id", "NOT FOUND"));
+                Log.d("MyMain", "loading data...");
                 loadData();
             }
         }
         else {
+            Log.d("MyMain", "test_session_id presente, aggiunta nelle sharedPref");
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString("session_id", getString(R.string.test_session_id));
             editor.apply();
-            Log.d("MyMain", "session id from test_session_id: " + sharedPref.getString("session_id", "NOT FOUND"));
 
+            Log.d("MyMain", "loading data...");
             loadData();
         }
     }
 
     void loadingPage(boolean start){
+        //se start == true -> loadingPage attivo
         if (start){
             findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
 
@@ -330,17 +329,6 @@ public class MainActivity extends AppCompatActivity implements Style.OnStyleLoad
         }
 
     }
-
-    //TODO metodo animazione barra di caricamento --> fine rimando a schermata mappa
-
-    // !!! MainActivity è la classe anche per la mappa !!!
-    //TODO caricamento: informazioni giocatore
-    //TODO caricamento: mostri e caramelle
-
-    //TODO onClick: immagine utente --> activity profilo utente
-    //TODO onClick: trofeo --> activity classifica
-
-
 
     @Override
     protected void onStart() {

@@ -33,14 +33,9 @@ public class FightEat extends AppCompatActivity {
     private SharedPreferences sharedPref;
     private JSONObject dataFromSymbol;
 
-    private static String URL_GET_IMAGE = "https://ewserver.di.unimi.it/mobicomp/mostri/getimage.php";
-    private static String URL_FIGHT_EAT = "https://ewserver.di.unimi.it/mobicomp/mostri/fighteat.php";
-
     private ImageView image;
     private TextView name;
     private TextView size;
-    private Button combattiBtn;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +47,6 @@ public class FightEat extends AppCompatActivity {
         image = findViewById(R.id.imageView);
         name = findViewById(R.id.name);
         size = findViewById(R.id.sizeView);
-        combattiBtn = findViewById(R.id.combattiView);
 
         Intent intent = getIntent();
         String stringData = intent.getStringExtra("data");
@@ -76,6 +70,7 @@ public class FightEat extends AppCompatActivity {
             }
         });
 
+        Button combattiBtn = findViewById(R.id.combattiView);
         combattiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -116,7 +111,7 @@ public class FightEat extends AppCompatActivity {
         }
         final RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest fightRequest = new JsonObjectRequest(
-                URL_FIGHT_EAT,
+                getString(R.string.url_fight_eat),
                 jsonData,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -153,7 +148,7 @@ public class FightEat extends AppCompatActivity {
 
         final RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest getImageRequest = new JsonObjectRequest(
-                URL_GET_IMAGE,
+                getString(R.string.url_get_image),
                 jsonData,
                 new Response.Listener<JSONObject>() {
                     @Override

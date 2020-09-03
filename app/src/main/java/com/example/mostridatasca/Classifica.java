@@ -28,10 +28,7 @@ import org.json.JSONObject;
 
 public class Classifica extends AppCompatActivity {
 
-    private final static String URL_GET_RANKING = "https://ewserver.di.unimi.it/mobicomp/mostri/ranking.php";
     private final static JSONObject AUTHENTICATION = new JSONObject();
-
-    private MyAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +44,14 @@ public class Classifica extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        loadData();
+    }
+
+    void setRecyclerView(){
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyAdapter(this);
+        MyAdapter adapter = new MyAdapter(this);
         recyclerView.setAdapter(adapter);
-        loadData();
     }
 
     //TODO migliorare grafica
@@ -64,39 +64,36 @@ public class Classifica extends AppCompatActivity {
     }
 
     public void loadData(){
+        Log.d("classifica", "loading data");
         RequestQueue mRequestQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest request = new JsonObjectRequest(
-                URL_GET_RANKING,
+        JsonObjectRequest getRankingRequest = new JsonObjectRequest(
+                getString(R.string.url_get_ranking),
                 AUTHENTICATION,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d("Volley", "Corrent: " + response.toString());
+                        Log.d("classifica", "getRanking response: " + response.toString());
 
                         //SALVATAGGIO DEI DATI
-                        JSONArray datiGiocatori = null;
-                        ModelClassifica modelClassifica = ModelClassifica.getInstance();
-                        modelClassifica.clearClassifica();
+                        Model mModel = Model.getInstance();
+                        mModel.clearClassifica();
 
                         try {
-                            datiGiocatori = response.getJSONArray("ranking");
-                            for (int i = 0; i < datiGiocatori.length(); i++){
-                                JSONObject o = datiGiocatori.getJSONObject(i);
-                                modelClassifica.addClassifica(o);
-                            }
+                            mModel.setDatiClassifica(response.getJSONArray("ranking"));
                         } catch (JSONException e){
                             e.printStackTrace();
                         }
-                        adapter.notifyDataSetChanged();
+
+                        setRecyclerView();
                     }
                 }
                 , new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("Volley", "VolleyError getMap: " + error.toString());
+                Log.d("classifica", "getRanking VolleyError: " + error.toString());
             }
         });
-        Log.d("Volledy", "sending request");
-        mRequestQueue.add(request);
+        Log.d("classifica", "getRankingRequest aggiunta nella queue");
+        mRequestQueue.add(getRankingRequest);
     }
 }

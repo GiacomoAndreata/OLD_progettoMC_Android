@@ -1,5 +1,17 @@
 <resources>
     <string name="app_name">Mostri Da Tasca</string>
+
     <string name="test_session_id">AVvRFwf9EbufwlaW</string>
+
     <string name="mapbox_access_token">pk.eyJ1IjoibWljaGVsZWFuZHJlYXRhIiwiYSI6ImNrMzcyODJ1NjA3ZWQzbW85emg2cWxkbHMifQ.o2QEcqmKEjqtxpcLikWdCw</string>
+
+    <string name="url_register">https://ewserver.di.unimi.it/mobicomp/mostri/register.php</string>
+    <string name="url_get_profile">https://ewserver.di.unimi.it/mobicomp/mostri/getprofile.php</string>
+    <string name="url_get_map">https://ewserver.di.unimi.it/mobicomp/mostri/getmap.php</string>
+    <string name="url_get_ranking">https://ewserver.di.unimi.it/mobicomp/mostri/ranking.php</string>
+    <string name="url_get_image">https://ewserver.di.unimi.it/mobicomp/mostri/getimage.php</string>
+    <string name="url_fight_eat">https://ewserver.di.unimi.it/mobicomp/mostri/fighteat.php</string>
+
+    <string name="monster_icon_id">MONSTER_ICON_ID</string>
+    <string name="candy_icon_id">CANDY_ICON_ID</string>
 </resources>

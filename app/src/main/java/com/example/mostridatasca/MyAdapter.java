@@ -27,10 +27,10 @@ public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
 
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         JSONObject giocatoriObject =null;
         try {
-            giocatoriObject = ModelClassifica.getInstance().get(position);
+            giocatoriObject = Model.getInstance().getElemClassifica(position);
         }catch (JSONException e){
             e.printStackTrace();
         }
@@ -41,6 +41,6 @@ public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return ModelClassifica.getInstance().getSize();
+        return Model.getInstance().getSizeClassifica();
     }
 }

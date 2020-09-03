@@ -58,6 +58,13 @@ public class Model {
         }
     }
 
+    void setUsername(String username){
+        try {
+            datiGiocatore.put("username", username);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
 
     //operazioni su dati classifica
     JSONObject getElemClassifica(int index) throws JSONException {

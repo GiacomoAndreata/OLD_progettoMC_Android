@@ -55,6 +55,14 @@ public class Model {
         }
     }
 
+    void setUsername(String username){
+        try {
+            datiGiocatore.put("username", username);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
+
     void clearMappa(){
         datiMappa = new JSONArray();
     }

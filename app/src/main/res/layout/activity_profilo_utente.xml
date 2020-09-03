@@ -6,17 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".ProfiloUtente">
 
-    <ImageButton
+    <ImageView
         android:id="@+id/imgUtente"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_marginStart="140dp"
+        android:layout_marginStart="132dp"
         android:layout_marginTop="60dp"
-        android:onClick="clickNew"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
+    <TextView
         android:id="@+id/username_profilo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -25,6 +24,7 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Name"
+        android:textColor="#000000"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgUtente" />
 
@@ -89,5 +89,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lp_profilo" />
+
+    <Button
+        android:id="@+id/btn_mod_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="132dp"
+        android:layout_marginTop="1dp"
+        android:text="Modifica immagine"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgUtente" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
